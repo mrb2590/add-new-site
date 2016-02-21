@@ -20,7 +20,7 @@ return
         RewriteEngine On
         # redirect to www.
         RewriteCond %{HTTP_HOST} ^'.$siteName.'
-        RewriteRule ^/(.*)$ http://'.$siteName.'/$1 [R=301,L]
+        RewriteRule ^/(.*)$ http://www.'.$siteName.'/$1 [R=301,L]
         # add trailing slash
         RewriteCond %{REQUEST_URI}  !\.(.*)$
         RewriteRule ^/(.*)([^/])$ http://'.$siteName.'/$1$2/ [R=301,L]
