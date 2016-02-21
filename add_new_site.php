@@ -124,7 +124,5 @@ createFile($cfg['paths']['sites_avail_dir']."/".$siteName.".conf", $vhostFileCon
 createDirectory($cfg['paths']['apache_log_dir']."/".$siteName, 0755, 'root');
 
 //enable site and reload apache
-exec('a2ensite '.$siteName);
-echo "Enabled site\r\n";
-exec('/etc/init.d/apache2 reload');
-echo "Apache has reloaded\r\n";
+echo shell_exec('a2ensite '.$siteName);
+echo shell_exec('/etc/init.d/apache2 reload');
