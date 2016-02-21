@@ -18,7 +18,7 @@ if (isset($argv[1])) {
         echo "Site name should at least have a top-level domain and a second-level domain.\n";
         exit;
     } else {
-        $siteName = escapeshellarg($argv[1]);
+        $siteName = $argv[1];
     }
 } else {
     echo "Invalid usage.\n";
@@ -42,13 +42,15 @@ if (isset($argv[2])) {
 }
 
 $cfg               = require "config.php";
-$indexFileContents = require "vhost.php";
+$indexFileContents = require "my_index.php";
 $vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
 
-define("SITES_DIR",       $cfg['paths']['sites'].$siteName);
-define("SITES_AVAIL_DIR", $cfg['paths']['sites_avail'].$siteName);
-define("APACHE_LOG_DIR",  $cfg['paths']['apache_log'].$siteName);
+define("SITES_DIR",       $cfg['paths']['sites']);
+define("SITES_AVAIL_DIR", $cfg['paths']['sites_avail']);
+define("APACHE_LOG_DIR",  $cfg['paths']['apache_log']);
 define("USERNAME",        $cfg['user']);
+
+$vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
 
 function createDirectory($path, $permissions, $owner) {
     // check if folder exists
@@ -63,7 +65,7 @@ function createDirectory($path, $permissions, $owner) {
         return;
     }
 
-    echo "Created directory ".$path." with permissions ".$permissions."\n";
+    echo "Created directory ".$path." with permissions ".(string)$permissions."\n";
 
     // set owner
     if (!chown($path, $owner)) {
@@ -84,17 +86,17 @@ function createFile($path, $fileContents, $permissions, $owner) {
             echo "Created file ".$path."\n";
         }
     }
-    fclose($indexFile);
+    fclose($file);
 
     // change permissions of public/index.php
-    if (!chmod($path, $permissions) {
-        echo "Failed to change permissions on ".$path." to ".$permissions."\n";
+    if (!chmod($path, $permissions)) {
+        echo "Failed to change permissions on ".$path." to ".(string)$permissions."\n";
     } else {
-        echo "Set file permissions on ".$path." to ".$permissions."\n";
+        echo "Set file permissions on ".$path." to ".(string)$permissions."\n";
     }
 
     // change owner of public/index.php
-    if (!chown($path, $owner) {
+    if (!chown($path, $owner)) {
         echo "Failed to set owner on ".$path." to ".$owner."\n";
     } else {
         echo "Set owner on ".$path." to ".$owner."\n";
@@ -114,23 +116,22 @@ function createFile($path, $fileContents, $permissions, $owner) {
 //     └── js
 //
 $directoryArray = array(
-    "/",
-    "/public",
-    "/public/css",
-    "/public/doc",
-    "/public/img",
-    "/public/img/content",
-    "/public/img/layout",
-    "/public/js"
+    "public",
+    "public/css",
+    "public/doc",
+    "public/img",
+    "public/img/content",
+    "public/img/layout",
+    "public/js"
 );
 
 // create websites folders
 foreach ($directoryArray as $dir) {
-    createDirectory(SITES_DIR.$dir, 0755, USERNAME);
+    createDirectory(SITES_DIR."/".$siteName."/".$dir, 0755, USERNAME);
 }
 
 // create public/index.php
-createFile(SITES_DIR."/public/index.php", $indexFileContents, 0755, USERNAME);
+createFile(SITES_DIR."/".$siteName."/public/index.php", $indexFileContents, 0755, USERNAME);
 
 // create virtual host file
 createFile(SITES_AVAIL_DIR."/".$siteName.".conf", $vhostFileContents, 0644, 'root');

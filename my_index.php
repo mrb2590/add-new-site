@@ -1,4 +1,7 @@
-<?php echo "Hello" ?>
+<?php
+
+return
+'<?php echo "Hello" ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,4 +11,4 @@
 <body>
 	Yay you can see me!
 </body>
-</html>
+</html>';

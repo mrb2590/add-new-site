@@ -8,9 +8,9 @@ return
 
         SetEnv APP_ENV "production"
 
-        DocumentRoot '.SITES_DIR.'/public
+        DocumentRoot '.SITES_DIR.'/'.$siteName.'/public
 
-        <Directory '.SITES_DIR.'/public>
+        <Directory '.SITES_DIR.'/'.$siteName.'/public>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride All
                 Order allow,deny
