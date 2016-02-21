@@ -43,7 +43,6 @@ if (isset($argv[2])) {
 
 $cfg               = require "config.php";
 $indexFileContents = require "my_index.php";
-$vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
 
 define("SITES_DIR",       $cfg['paths']['sites']);
 define("SITES_AVAIL_DIR", $cfg['paths']['sites_avail']);
