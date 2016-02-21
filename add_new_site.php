@@ -10,6 +10,48 @@ if (posix_getuid() != 0) {
     exit;
 }
 
+function createDirectory($path, $permissions, $owner) {
+    // check if folder exists
+    if (file_exists($path)) {
+        echo $path." already exists! Skipping...\n";
+        return;
+    }
+
+    // make directory
+    if (!mkdir($path, $permissions)) {
+        echo "Failed to create ".$path."\n";
+        return;
+    }
+
+    // set owner
+    if (!chown($path, $owner)) {
+        echo "Failed to set owner of ".$path." to ".$owner."\n";
+        return;
+    }
+}
+
+function createFile($path, $fileContents, $permissions, $owner) {
+    if (!$file = fopen($path, "w")) {
+        echo "Failed to create ".$path."\n";
+    } else {
+        if (!fwrite($file, $fileContents)) {
+            echo "Failed to write to ".$path."\n";
+        }
+    }
+
+    fclose($file);
+
+    // change permissions of public/index.php
+    if (!chmod($path, $permissions)) {
+        echo "Failed to change permissions on ".$path." to ".(string)$permissions."\n";
+    }
+
+    // change owner of public/index.php
+    if (!chown($path, $owner)) {
+        echo "Failed to set owner on ".$path." to ".$owner."\n";
+    }
+}
+
 // validate site name
 if (isset($argv[1])) {
     // site name must contain a '.'
@@ -43,64 +85,7 @@ if (isset($argv[2])) {
 
 $cfg               = require "config.php";
 $indexFileContents = require "my_index.php";
-
-define("SITES_DIR",       $cfg['paths']['sites']);
-define("SITES_AVAIL_DIR", $cfg['paths']['sites_avail']);
-define("APACHE_LOG_DIR",  $cfg['paths']['apache_log']);
-define("USERNAME",        $cfg['user']);
-
 $vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
-
-function createDirectory($path, $permissions, $owner) {
-    // check if folder exists
-    if (file_exists($path)) {
-        echo $path." already exists! Skipping...\n";
-        return;
-    }
-
-    // make directory
-    if (!mkdir($path, $permissions)) {
-        echo "Failed to create ".$path."\n";
-        return;
-    }
-
-    echo "Created directory ".$path." with permissions ".(string)$permissions."\n";
-
-    // set owner
-    if (!chown($path, $owner)) {
-        echo "Failed to set owner of ".$path." to ".$owner."\n";
-        return;
-    }
-
-    echo "Set owner of ".$path." to ".$owner."\n";
-}
-
-function createFile($path, $fileContents, $permissions, $owner) {
-    if (!$file = fopen($path, "w")) {
-        echo "Failed to create ".$path."\n";
-    } else {
-        if (!fwrite($file, $fileContents)) {
-            echo "Failed to write to ".$path."\n";
-        } else {
-            echo "Created file ".$path."\n";
-        }
-    }
-    fclose($file);
-
-    // change permissions of public/index.php
-    if (!chmod($path, $permissions)) {
-        echo "Failed to change permissions on ".$path." to ".(string)$permissions."\n";
-    } else {
-        echo "Set file permissions on ".$path." to ".(string)$permissions."\n";
-    }
-
-    // change owner of public/index.php
-    if (!chown($path, $owner)) {
-        echo "Failed to set owner on ".$path." to ".$owner."\n";
-    } else {
-        echo "Set owner on ".$path." to ".$owner."\n";
-    }
-}
 
 // websites directroy structure
 //
@@ -126,17 +111,17 @@ $directoryArray = array(
 
 // create websites folders
 foreach ($directoryArray as $dir) {
-    createDirectory(SITES_DIR."/".$siteName."/".$dir, 0755, USERNAME);
+    createDirectory($cfg['paths']['sites_dir']."/".$siteName."/".$dir, 0755, $cfg['user']);
 }
 
 // create public/index.php
-createFile(SITES_DIR."/".$siteName."/public/index.php", $indexFileContents, 0755, USERNAME);
+createFile($cfg['paths']['sites_dir']."/".$siteName."/public/index.php", $indexFileContents, 0755, $cfg['user']);
 
 // create virtual host file
-createFile(SITES_AVAIL_DIR."/".$siteName.".conf", $vhostFileContents, 0644, 'root');
+createFile($cfg['paths']['sites_avail_dir']."/".$siteName.".conf", $vhostFileContents, 0644, 'root');
 
 // create apache log directory for this site
-createDirectory(APACHE_LOG_DIR."/".$siteName, 0755, 'root');
+createDirectory($cfg['paths']['apache_log_dir']."/".$siteName, 0755, 'root');
 
 //enable site and reload apache
 exec('a2ensite '.$siteName);
