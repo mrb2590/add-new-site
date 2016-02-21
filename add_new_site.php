@@ -44,6 +44,7 @@ if (isset($argv[2])) {
 $cfg               = require "config.php";
 $indexFileContents = require "vhost.php";
 $vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
+
 define("SITES_DIR",       $cfg['paths']['sites'].$siteName);
 define("SITES_AVAIL_DIR", $cfg['paths']['sites_avail'].$siteName);
 define("APACHE_LOG_DIR",  $cfg['paths']['apache_log'].$siteName);
