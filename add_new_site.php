@@ -18,7 +18,7 @@ function createDirectory($path, $permissions, $owner) {
     }
 
     // make directory
-    if (!mkdir($path, $permissions)) {
+    if (!mkdir($path, $permissions, true)) {
         echo "Failed to create ".$path."\n";
         return;
     }
