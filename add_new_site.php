@@ -52,70 +52,87 @@ function createFile($path, $fileContents, $permissions, $owner) {
     }
 }
 
-// validate site name
-if (isset($argv[1])) {
-    // site name must contain a '.'
-    if (strpos($argv[1], ".") === false) {
-        echo "Invalid usage.\n";
-        echo "Site name should at least have a top-level domain and a second-level domain.\n";
-        exit;
-    } else {
-        $siteName = $argv[1];
-    }
-} else {
-    echo "Invalid usage.\n";
-    echo "Usage: php add_new_site.php mysite.com [-www]\n";
-    echo "-www flag will enable redirecting mysite.com to www.mysite.com\n";
-    exit;
-}
+$usageMessage =  "Usage: php add_new_site.php mysite.com -www -laravel\n";
+$usageMessage .= "Site name should at least have a top-level domain and a second-level domain.\n";
+$usageMessage .= "-www flag will enable redirecting mysite.com to www.mysite.com\n";
+$usageMessage .= "-laravel flag will set up a new laravel project\n";
 
-// validate flag
-if (isset($argv[2])) {
-    if ($argv[2] != '-www') {
-        echo "Invalid flag.\n";
-        echo "Usage: php add_new_site.php mysite.com [-www]\n";
-        echo "-www flag will enable redirecting mysite.com to www.mysite.com\n";
-        exit;
-    } else {
-        $www = true;
+//get args and validate them
+$www     = false;
+$laravel = false;
+foreach($argv as $i => $flag) {
+    if ($i == 0) {
+        continue;
+    } elseif ($i == 1) {
+        if (strpos($flag, ".") === false) {
+            echo $usageMessage;
+            exit;
+        } else {
+            $siteName = $flag;
+        }
+    } elseif ($i == 2) {
+        if ($flag == '-www') {
+            $www = true;
+        } elseif ($flag == '-laravel') {
+            $laravel = true;
+        } else {
+            echo $usageMessage;
+            exit;
+        }
     }
-} else {
-    $www = false;
 }
 
 $cfg               = require "config.php";
 $indexFileContents = require "my_index.php";
-$vhostFileContents = require ($www) ? "vhost_www_redirect.php" : "vhost.php";
-
-// websites directroy structure
-//
-// siteName
-// └── public
-//     ├── css
-//     ├── doc
-//     ├── img
-//     │   ├── content
-//     │   └── layout
-//     ├── index.php
-//     └── js
-//
-$directoryArray = array(
-    "public",
-    "public/css",
-    "public/doc",
-    "public/img",
-    "public/img/content",
-    "public/img/layout",
-    "public/js"
-);
-
-// create websites folders
-foreach ($directoryArray as $dir) {
-    createDirectory($cfg['paths']['sites_dir']."/".$siteName."/".$dir, 0755, $cfg['user']);
+if ($www) {
+    $vhostFileContents = require "vhost_www_redirect.php";
+} elseif ($laravel) {
+    $vhostFileContents = require "vhost_laravel.php";
+} else {
+    $vhostFileContents = require "vhost.php";
 }
 
-// create public/index.php
-createFile($cfg['paths']['sites_dir']."/".$siteName."/public/index.php", $indexFileContents, 0755, $cfg['user']);
+if ($laravel) {
+    if (!chdir($cfg['paths']['sites_dir'])) {
+        echo "Failed to change directory to ".$cfg['paths']['sites_dir']."\n";
+        exit;
+    }
+    echo shell_exec('laravel new '.$siteName);
+    shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir']);
+    shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir']);
+    shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/storage');
+    shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/bootstrap/cache');
+} else {
+    // websites directroy structure
+    //
+    // siteName
+    // └── public
+    //     ├── css
+    //     ├── doc
+    //     ├── img
+    //     │   ├── content
+    //     │   └── layout
+    //     ├── index.php
+    //     └── js
+    //
+    $directoryArray = array(
+        "public",
+        "public/css",
+        "public/doc",
+        "public/img",
+        "public/img/content",
+        "public/img/layout",
+        "public/js"
+    );
+
+    // create websites folders
+    foreach ($directoryArray as $dir) {
+        createDirectory($cfg['paths']['sites_dir']."/".$siteName."/".$dir, 0755, $cfg['user']);
+    }
+
+    // create public/index.php
+    createFile($cfg['paths']['sites_dir']."/".$siteName."/public/index.php", $indexFileContents, 0755, $cfg['user']);
+}
 
 // create virtual host file
 createFile($cfg['paths']['sites_avail_dir']."/".$siteName.".conf", $vhostFileContents, 0644, 'root');
