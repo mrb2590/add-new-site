@@ -99,7 +99,7 @@ if ($laravel) {
     }
     echo shell_exec('laravel new '.$siteName);
     shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir']);
-    shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir']);
+    shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
     shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/storage');
     shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/bootstrap/cache');
 } else {
