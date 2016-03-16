@@ -60,6 +60,10 @@ $usageMessage .= "-laravel flag will set up a new laravel project\n";
 //get args and validate them
 $www     = false;
 $laravel = false;
+if (count($argv) < 2) {
+    echo $usageMessage;
+    exit;
+}
 foreach($argv as $i => $flag) {
     if ($i == 0) {
         continue;
