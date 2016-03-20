@@ -102,7 +102,8 @@ if ($laravel) {
         exit;
     }
     echo shell_exec('laravel new '.$siteName);
-    shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir']);
+    //change onwership and set permissions
+    shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
     shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
     shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/storage');
     shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/bootstrap/cache');
@@ -136,6 +137,10 @@ if ($laravel) {
 
     // create public/index.php
     createFile($cfg['paths']['sites_dir']."/".$siteName."/public/index.php", $indexFileContents, 0755, $cfg['user']);
+
+    //change onwership and set permissions
+    shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
+    shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
 }
 
 // create virtual host file
