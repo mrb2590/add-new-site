@@ -1,6 +1,6 @@
 <?php
 /*
- * usage: php add_new_site.php mysite.com [-laravel]
+ * usage: php add_new_site.php mysite.com [-laravel] [-slash] [-www]
 */
 
 // user must be root
@@ -49,12 +49,19 @@ function createFile($path, $fileContents, $permissions, $owner) {
 }
 
 // echoed if an argument is invalid
-$usageMessage =  "Usage: php add_new_site.php mysite.com [-laravel]\n";
+$usageMessage =  "php add_new_site.php mysite.com [-laravel] [-slash] [-www]\n";
 $usageMessage .= "Site name must have a top-level domain and a second-level domain.\n";
 $usageMessage .= "-laravel flag will set up a new laravel project\n";
+$usageMessage .= "-www flag will add www redirect rules to the host file\n";
+$usageMessage .= "-slash flag will add trailing slash redirect rules to the host file\n";
+
+//set flag defaults (if a flag is set, it will orverride these)
+$laravel = false; // do not install laravel framework
+$rewriteEngine = '#'; // turn off RewriteEngine in host file
+$www = '#'; //comment out www redirect rules in host file
+$slash = '#'; // comment out trailing slash redirect rules in host file
 
 //get args and validate them
-$laravel = false;
 if (count($argv) < 2) {
     echo $usageMessage;
     exit;
@@ -72,6 +79,14 @@ foreach($argv as $i => $flag) {
     } elseif ($i > 1) {
         switch ($flag) {
             case '-laravel': $laravel = true; break;
+            case '-www':
+                $rewriteEngine = '';
+                $www = ''; // will not comment out www redirect rules in host file
+                break;
+            case '-slash':
+                $rewriteEngine = '';
+                $slash = ''; // will not comment out trailing slash redirect rules in host file
+                break;
             default: echo $usageMessage; exit;
         }
     }
