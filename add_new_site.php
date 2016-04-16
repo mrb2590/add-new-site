@@ -1,6 +1,6 @@
 <?php
 /*
- * usage: php add_new_site.php mysite.com [-laravel] [-slash] [-www]
+ * usage: php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots]
 */
 
 // user must be root
@@ -54,9 +54,11 @@ $usageMessage .= "Site name must have a top-level domain and a second-level doma
 $usageMessage .= "-laravel flag will set up a new laravel project\n";
 $usageMessage .= "-www flag will add www redirect rules to the host file\n";
 $usageMessage .= "-slash flag will add trailing slash redirect rules to the host file\n";
+$usageMessage .= "-nobots flag will add a robots.txt file which disallows web crawlers (that listen to it)\n";
 
 //set flag defaults (if a flag is set, it will orverride these)
 $laravel = false; // do not install laravel framework
+$nobots = false; // do not add robots.txt file
 $rewriteEngine = '#'; // turn off RewriteEngine in host file
 $www = '#'; //comment out www redirect rules in host file
 $slash = '#'; // comment out trailing slash redirect rules in host file
@@ -79,6 +81,7 @@ foreach($argv as $i => $flag) {
     } elseif ($i > 1) {
         switch ($flag) {
             case '-laravel': $laravel = true; break;
+            case '-nobots': $nobots = true; break;
             case '-www':
                 $rewriteEngine = '';
                 $www = ''; // will not comment out www redirect rules in host file
@@ -92,9 +95,10 @@ foreach($argv as $i => $flag) {
     }
 }
 
-$cfg               = require 'config.php';
-$indexFileContents = require 'site_index.php';
-$vhostFileContents = require 'vhost.php';
+$cfg                = require 'config.php';
+$indexFileContents  = require 'site_index.php';
+$vhostFileContents  = require 'vhost.php';
+$robotsFileContents = ($nobots) ? require 'robots.php' : null;
 
 if ($laravel) {
     if (!chdir($cfg['paths']['sites_dir'])) {
@@ -150,7 +154,12 @@ if ($laravel) {
     // create public/index.php
     createFile($cfg['paths']['sites_dir'].'/'.$siteName.'/public/index.php', $indexFileContents, 0755, $cfg['user']);
 
-    //change onwership and set permissions
+    // add robots.txt if flag is set
+    if ($nobots) {
+        createFile($cfg['paths']['sites_dir'].'/'.$siteName.'/public/robots.txt', $robotsFileContents, 0755, $cfg['user']);
+    }
+
+    //set ownership and permissions
     echo shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
     echo shell_exec('chmod 775 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
 }
