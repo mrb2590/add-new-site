@@ -2,11 +2,11 @@
 
 return
 '<virtualHost *:80>
-        ServerAdmin mike@sendmejokes.com
+        ServerAdmin '.$cfg['email'].'
         ServerName '.$siteName.'
-        ServerAlias '.$siteName.'
+        #ServerAlias '.$siteName.'
 
-        SetEnv APP_ENV "production"
+        SetEnv APP_ENV "prod"
 
         DocumentRoot '.$cfg['paths']['sites_dir'].'/'.$siteName.'/public
 
@@ -17,10 +17,14 @@ return
                 allow from all
         </Directory>
 
-        RewriteEngine On
+        #RewriteEngine On
+        # redirect to www.
+        #RewriteCond %{HTTP_HOST} ^'.$siteName.'
+        #RewriteRule ^/(.*)$ http://www.'.$siteName.'/$1 [R=301,L]
+
         # add trailing slash
-        RewriteCond %{REQUEST_URI}  !\.(.*)$
-        RewriteRule ^/(.*)([^/])$ http://'.$siteName.'/$1$2/ [R=301,L]
+        #RewriteCond %{REQUEST_URI}  !\.(.*)$
+        #RewriteRule ^/(.*)([^/])$ http://'.$siteName.'/$1$2/ [R=301,L]
 
         ErrorLog ${APACHE_LOG_DIR}/'.$siteName.'/error.log
 
