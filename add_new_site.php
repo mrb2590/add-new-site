@@ -49,12 +49,12 @@ function createFile($path, $fileContents, $permissions, $owner) {
 }
 
 // echoed if an argument is invalid
-$usageMessage =  "php add_new_site.php mysite.com [-laravel] [-slash] [-www]\n";
+$usageMessage =  "php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots]\n";
 $usageMessage .= "Site name must have a top-level domain and a second-level domain.\n";
 $usageMessage .= "-laravel flag will set up a new laravel project\n";
 $usageMessage .= "-www flag will add www redirect rules to the host file\n";
 $usageMessage .= "-slash flag will add trailing slash redirect rules to the host file\n";
-$usageMessage .= "-nobots flag will add a robots.txt file which disallows web crawlers (that listen to it)\n";
+$usageMessage .= "-nobots flag will add a robots.txt file which will disallow web crawlers (that listen to it)\n";
 
 //set flag defaults (if a flag is set, it will orverride these)
 $laravel = false; // do not install laravel framework
