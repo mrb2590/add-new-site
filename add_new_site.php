@@ -1,6 +1,6 @@
 <?php
 /*
- * usage: php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots]
+ * usage: php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots] [-minimvc]
 */
 
 // user must be root
@@ -49,16 +49,18 @@ function createFile($path, $fileContents, $permissions, $owner) {
 }
 
 // echoed if an argument is invalid
-$usageMessage =  "php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots]\n";
+$usageMessage =  "php add_new_site.php mysite.com [-laravel] [-slash] [-www] [-nobots] [-minimvc]\n";
 $usageMessage .= "Site name must have a top-level domain and a second-level domain.\n";
 $usageMessage .= "-laravel flag will set up a new laravel project\n";
 $usageMessage .= "-www flag will add www redirect rules to the host file\n";
 $usageMessage .= "-slash flag will add trailing slash redirect rules to the host file\n";
 $usageMessage .= "-nobots flag will add a robots.txt file which will disallow web crawlers (that listen to it)\n";
+$usageMessage .= "-minimvc flag will install my mini-mvc framework\n";
 
 //set flag defaults (if a flag is set, it will orverride these)
 $laravel = false; // do not install laravel framework
 $nobots = false; // do not add robots.txt file
+$minimvc = false; // do not ainstall MiniMVC
 $rewriteEngine = '#'; // turn off RewriteEngine in host file
 $www = '#'; //comment out www redirect rules in host file
 $slash = '#'; // comment out trailing slash redirect rules in host file
@@ -81,6 +83,7 @@ foreach($argv as $i => $flag) {
     } elseif ($i > 1) {
         switch ($flag) {
             case '-laravel': $laravel = true; break;
+            case '-minimvc': $minimvc = true; break;
             case '-nobots': $nobots = true; break;
             case '-www':
                 $rewriteEngine = '';
@@ -111,6 +114,19 @@ if ($laravel) {
     echo shell_exec('chmod 755 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
     echo shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/storage');
     echo shell_exec('chmod 777 -R '.$cfg['paths']['sites_dir'].'/'.$siteName.'/bootstrap/cache');
+} elseif ($minimvc) {
+    // create site folder
+    createDirectory($cfg['paths']['sites_dir'].'/'.$siteName, 0755, $cfg['user']);
+    if (!chdir($cfg['paths']['sites_dir'].'/'.$siteName)) {
+        echo 'Failed to change directory to '.$cfg['paths']['sites_dir'].'/'.$siteName."\n";
+        exit;
+    }
+    echo shell_exec('git init');
+    echo shell_exec('git pull https://github.com/mrb2590/mini-mvc.git');
+    echo shell_exec('composer install');
+    //set ownership and permissions
+    echo shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
+    echo shell_exec('chmod 775 -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
 } else {
     // websites directory structure
     //
