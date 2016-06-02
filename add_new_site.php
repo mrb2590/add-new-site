@@ -121,8 +121,9 @@ if ($laravel) {
         echo 'Failed to change directory to '.$cfg['paths']['sites_dir'].'/'.$siteName."\n";
         exit;
     }
-    echo shell_exec('git init');
-    echo shell_exec('git pull https://github.com/mrb2590/mini-mvc.git');
+    echo shell_exec('git clone https://github.com/mrb2590/mini-mvc.git');
+    echo shell_exec('cp -a '.$cfg['paths']['sites_dir'].'/'.$siteName.'/mini-mvc/* '.$cfg['paths']['sites_dir'].'/'.$siteName);
+    echo shell_exec('rm -r '.$cfg['paths']['sites_dir'].'/'.$siteName.'/mini-mvc');
     echo shell_exec('composer install');
     //set ownership and permissions
     echo shell_exec('chown '.$cfg['user'].' -R '.$cfg['paths']['sites_dir'].'/'.$siteName);
