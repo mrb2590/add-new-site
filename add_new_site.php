@@ -64,6 +64,7 @@ $minimvc = false; // do not ainstall MiniMVC
 $rewriteEngine = '#'; // turn off RewriteEngine in host file
 $www = '#'; //comment out www redirect rules in host file
 $slash = '#'; // comment out trailing slash redirect rules in host file
+$scriptDir = dirname(__FILE__);
 
 //get args and validate them
 if (count($argv) < 2) {
@@ -98,10 +99,10 @@ foreach($argv as $i => $flag) {
     }
 }
 
-$cfg                = require 'config.php';
-$indexFileContents  = require 'site_index.php';
-$vhostFileContents  = require 'vhost.php';
-$robotsFileContents = ($nobots) ? require 'robots.php' : null;
+$cfg                = require $scriptDir.'/config.php';
+$indexFileContents  = require $scriptDir.'/site_index.php';
+$vhostFileContents  = require $scriptDir.'/vhost.php';
+$robotsFileContents = ($nobots) ? require $scriptDir.'/robots.php' : null;
 
 if ($laravel) {
     if (!chdir($cfg['paths']['sites_dir'])) {
@@ -189,4 +190,4 @@ createDirectory($cfg['paths']['apache_log_dir'].'/'.$siteName, 0755, 'root');
 
 //enable site and reload apache
 echo shell_exec('a2ensite '.$siteName);
-echo shell_exec('/etc/init.d/apache2 reload');
+echo shell_exec('service apache2 reload');
